@@ -47,8 +47,9 @@ def main(args):
         args=model_args
     )
 
-    # Train the model
-    model.train_model(train_df, output_dir=args.output, args={'overwrite_output_dir': False, 'save_steps': -1, 'train_batch_size': 16, 'evaluate_during_training': True, 'evaluate_during_training_verbose': True}, eval_df=eval_df, pearsonr=stats.pearsonr, spearmanr=stats.spearmanr)
+    if not args.eval_only:
+        # Train the model
+        model.train_model(train_df, output_dir=args.output, args={'overwrite_output_dir': False, 'save_steps': -1, 'train_batch_size': 16, 'evaluate_during_training': True, 'evaluate_during_training_verbose': True, 'evaluate_during_training_steps': -1}, eval_df=eval_df, pearsonr=stats.pearsonr, spearmanr=stats.spearmanr)
 
     # Evaluate the model
     result, model_outputs, wrong_predictions = model.eval_model(eval_df, pearsonr=stats.pearsonr, spearmanr=stats.spearmanr)
@@ -56,7 +57,10 @@ def main(args):
     # Make predictions with the model
     predictions, raw_outputs = model.predict(eval_df['text'])
 
-    print('HERE')
+    if args.eval_only:
+        with open(os.path.join(args.output, 'predictions.tbl'), 'w') as f:
+            for text, real_pred, program_pred in zip(eval_df['text'], eval_df['labels'], predictions):
+                f.write(f'{text}\t{real_pred}\t{program_pred}\n')
 
 
 if __name__ == '__main__':
@@ -69,6 +73,8 @@ if __name__ == '__main__':
     parser.add_argument('--bert_type', default='camembert',
                         help='input file in (gz or xml currently). If none, then just database is loaded')
     parser.add_argument('--output',
+                        help='input file in (gz or xml currently). If none, then just database is loaded')
+    parser.add_argument('--eval_only', action='store_true',
                         help='input file in (gz or xml currently). If none, then just database is loaded')
     args = parser.parse_args()
 

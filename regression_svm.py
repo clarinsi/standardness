@@ -9,6 +9,9 @@ from scipy import stats
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import Ridge
 from sklearn.svm import SVR
+import numpy as np
+
+seed = 23
 
 logging.basicConfig(level=logging.INFO)
 transformers_logger = logging.getLogger("transformers")
@@ -16,6 +19,7 @@ transformers_logger.setLevel(logging.WARNING)
 
 
 def create_models(classifier, fname, X_train, y_train, X_test, y_true):
+    classifier.random_state = seed
     print('###############################################################')
     print('Starting calculation..')
     model = classifier.fit(X_train, y_train)
@@ -77,6 +81,7 @@ if __name__ == '__main__':
                         help='input file in (gz or xml currently). If none, then just database is loaded')
     args = parser.parse_args()
 
+    np.random.seed(seed)
     start = time.time()
     main(args)
     logging.info("TIME: {}".format(time.time() - start))
