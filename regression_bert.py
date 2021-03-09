@@ -41,7 +41,7 @@ def main(args):
 
     # Create a ClassificationModel
     model = ClassificationModel(
-        "camembert",
+        args.bert_type,
         args.bert,
         num_labels=1,
         args=model_args
@@ -49,14 +49,6 @@ def main(args):
 
     # Train the model
     model.train_model(train_df, output_dir=args.output, args={'overwrite_output_dir': False, 'save_steps': -1, 'train_batch_size': 16, 'evaluate_during_training': True, 'evaluate_during_training_verbose': True}, eval_df=eval_df, pearsonr=stats.pearsonr, spearmanr=stats.spearmanr)
-
-    # model = ClassificationModel(
-    #     "camembert",
-    #     # "outputs/sloberta_5/checkpoint-2143-epoch-1",
-    #     "data/outputs/sloberta_5/checkpoint-1072-epoch-1",
-    #     num_labels=1,
-    #     args=model_args
-    # )
 
     # Evaluate the model
     result, model_outputs, wrong_predictions = model.eval_model(eval_df, pearsonr=stats.pearsonr, spearmanr=stats.spearmanr)
@@ -73,6 +65,8 @@ if __name__ == '__main__':
     parser.add_argument('input',
                         help='input file in (gz or xml currently). If none, then just database is loaded')
     parser.add_argument('--bert',
+                        help='input file in (gz or xml currently). If none, then just database is loaded')
+    parser.add_argument('--bert_type', default='camembert',
                         help='input file in (gz or xml currently). If none, then just database is loaded')
     parser.add_argument('--output',
                         help='input file in (gz or xml currently). If none, then just database is loaded')
