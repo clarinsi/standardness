@@ -35,7 +35,7 @@ def main(args):
     # Enabling regression
     # Setting optional model configuration
     model_args = ClassificationArgs()
-    model_args.num_train_epochs = 5
+    model_args.num_train_epochs = args.epochs
     model_args.regression = True
     model_args.manual_seed = 23
 
@@ -71,6 +71,8 @@ if __name__ == '__main__':
     parser.add_argument('--bert',
                         help='input file in (gz or xml currently). If none, then just database is loaded')
     parser.add_argument('--bert_type', default='camembert',
+                        help='input file in (gz or xml currently). If none, then just database is loaded')
+    parser.add_argument('--epochs', type=int, default=5,
                         help='input file in (gz or xml currently). If none, then just database is loaded')
     parser.add_argument('--output',
                         help='input file in (gz or xml currently). If none, then just database is loaded')
