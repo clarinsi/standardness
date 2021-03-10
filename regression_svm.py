@@ -23,11 +23,14 @@ def create_models(classifier, fname, X_train, y_train, X_test, y_true):
     print('###############################################################')
     print('Starting calculation..')
     model = classifier.fit(X_train, y_train)
-    _ = joblib.dump(model, f'{args.output}/{fname}', compress=9)
+    _ = joblib.dump(model, os.path.join(args.output, fname), compress=9)
     y_test = model.predict(X_test)
 
     pearson = stats.pearsonr(y_test, y_true)
     spearman = stats.spearmanr(y_test, y_true)
+    with open(os.path.join(args.output, fname) + '.result', 'w') as f:
+        f.write(f'pearson={str(pearson)}|spearman={str(spearman)}')
+    os.path.join(args.output, fname)
     print(f'{fname} - Pearson: {pearson} | Spearman: {spearman}')
 
 
