@@ -49,7 +49,7 @@ def main(args):
 
     with open(args.output_file, 'w') as f:
         for res in results:
-            f.write('\t'.join(res))
+            f.write('\t'.join(res) + '\n')
 
 
 if __name__ == '__main__':
