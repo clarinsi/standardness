@@ -14,20 +14,13 @@ transformers_logger = logging.getLogger("transformers")
 transformers_logger.setLevel(logging.WARNING)
 
 def read_bert(folder_path, folder_name):
-    best_result_spearman = -1
-    best_result_pearson = -1
-    for folder in os.listdir(folder_path):
-        if os.path.isdir(os.path.join(folder_path, folder)):
-            with open(os.path.join(folder_path, folder, 'eval_results.txt'), 'r') as f:
+    for file in os.listdir(folder_path):
+        if file.find('test') != -1:
+            with open(os.path.join(folder_path, file), 'r') as f:
                 # ugly I know
                 text = f.read()
-                pear_pred = float(text.split('pearsonr = (')[1].split(',')[0])
-                sper_pred = float(text.split('spearmanr = SpearmanrResult(correlation=')[1].split(',')[0])
-                name = folder_name
-                if pear_pred > best_result_pearson:
-                    best_result_pearson = pear_pred
-                if sper_pred > best_result_spearman:
-                    best_result_spearman = sper_pred
+                best_result_pearson = float(text.split('pearsonr = (')[1].split(',')[0])
+                best_result_spearman = float(text.split('spearmanr = SpearmanrResult(correlation=')[1].split(',')[0])
 
     return [[folder_name, str(best_result_pearson), str(best_result_spearman)]]
 
@@ -58,9 +51,10 @@ def main(args):
         for res in results:
             f.write('\t'.join(res))
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Extract structures from a parsed corpus.')
+        description='Walk over results from regression bert and regression svm.')
     parser.add_argument('--results_path', default='data/outputs/',
                         help='input file in (gz or xml currently). If none, then just database is loaded')
     parser.add_argument('--output_file', default='data/outputs/results.tbl',

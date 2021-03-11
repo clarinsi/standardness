@@ -1,12 +1,15 @@
 import argparse
 import time
-import unidecode
 
 
 def raw_input_generator(path):
     with open(path, 'r') as f:
         for line in f.readlines():
             yield line.strip()
+
+
+def swap_diacritics(word):
+    return word.replace('č', 'c').replace('ć', 'c').replace('š', 's').replace('ž', 'z')
 
 
 def tbl_input_generator(path):
@@ -23,7 +26,7 @@ def tbl_input_generator(path):
             else:
                 word, norm_word = line.strip().split('\t')
                 wn += 1
-                dn += 1 if unidecode.unidecode(word.lower()) != unidecode.unidecode(norm_word.lower()) else 0
+                dn += 1 if swap_diacritics(word.lower()) != swap_diacritics(norm_word.lower()) else 0
 
 
 def write(raw_generator, tbl_generator, path):
@@ -42,11 +45,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Input raw data and .tbl format (from babushka-bench) and return preprocessed data for training.')
     parser.add_argument('raw_input',
-                        help='Structures definitions in xml file')
+                        help='')
     parser.add_argument('tbl_input',
-                        help='input file in (gz or xml currently). If none, then just database is loaded')
+                        help='')
     parser.add_argument('output',
-                        help='Structures definitions in xml file')
+                        help='')
     args = parser.parse_args()
 
     start = time.time()
