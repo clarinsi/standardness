@@ -31,7 +31,7 @@ def main(args):
             else:
                 data = test_data
         with open(f'{args.input}/{filename}', 'r') as f:
-            data += [[line.strip().split('\t')[0], float(line.strip().split('\t')[1])] for line in f.readlines()]
+            data += [[line.strip().split('\t')[0].lower(), float(line.strip().split('\t')[1])] for line in f.readlines()]
 
     train_df = pd.DataFrame(train_data)
     train_df.columns = ["text", "labels"]
