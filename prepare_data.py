@@ -1,5 +1,6 @@
 import argparse
 import time
+import unidecode
 
 
 def raw_input_generator(path):
@@ -22,7 +23,7 @@ def tbl_input_generator(path):
             else:
                 word, norm_word = line.strip().split('\t')
                 wn += 1
-                dn += 1 if word.lower() != norm_word.lower() else 0
+                dn += 1 if unidecode.unidecode(word.lower()) != unidecode.unidecode(norm_word.lower()) else 0
 
 
 def write(raw_generator, tbl_generator, path):

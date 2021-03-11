@@ -17,19 +17,22 @@ transformers_logger.setLevel(logging.WARNING)
 def main(args):
     # Preparing train data
     train_data = []
-    eval_data = []
+    dev_data = []
+    test_data = []
     for filename in os.listdir(args.input):
-        if filename.find('test') == -1:
+        if filename.find('test') == -1 and filename.find('dev') == -1:
             data = train_data
+        elif filename.find('test') == -1:
+            data = dev_data
         else:
-            data = eval_data
+            data = test_data
         with open(f'{args.input}/{filename}', 'r') as f:
             data += [[line.strip().split('\t')[0], float(line.strip().split('\t')[1])] for line in f.readlines()]
 
     train_df = pd.DataFrame(train_data)
     train_df.columns = ["text", "labels"]
 
-    eval_df = pd.DataFrame(eval_data)
+    eval_df = pd.DataFrame(dev_data)
     eval_df.columns = ["text", "labels"]
 
     # Enabling regression
