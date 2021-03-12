@@ -47,6 +47,15 @@ def main(args):
             else:
                 results += read_svm(folder_path, folder)
 
+    # sort by language
+    sr_res = [res for res in results if res[0].find('sr') != -1]
+    hr_res = [res for res in results if res[0].find('hr') != -1]
+    sl_res = [res for res in results if res[0] not in [r[0] for r in sr_res] and res[0] not in [r[0] for r in hr_res]]
+
+    old_res_len = len(results)
+    results = sr_res + hr_res + sl_res
+    assert old_res_len == len(results)
+
     with open(args.output_file, 'w') as f:
         for res in results:
             f.write('\t'.join(res) + '\n')
