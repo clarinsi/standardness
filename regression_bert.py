@@ -33,6 +33,9 @@ def main(args):
         with open(f'{args.input}/{filename}', 'r') as f:
             data += [[line.strip().split('\t')[0].lower(), float(line.strip().split('\t')[1])] for line in f.readlines()]
 
+    # TODO ERASE THIS
+    train_data = test_data
+
     train_df = pd.DataFrame(train_data)
     train_df.columns = ["text", "labels"]
 
@@ -42,12 +45,26 @@ def main(args):
     test_df = pd.DataFrame(test_data)
     test_df.columns = ["text", "labels"]
 
+    model_dir = os.path.join(args.model, args.name)
+    best_model_dir = os.path.join(args.best_model, args.name)
+
     # Enabling regression
     # Setting optional model configuration
     model_args = ClassificationArgs()
     model_args.num_train_epochs = args.epochs
     model_args.regression = True
     model_args.manual_seed = 23
+    # model_args.overwrite_output_dir = True
+    model_args.save_steps = -1
+    model_args.train_batch_size = 16
+    model_args.evaluate_during_training = True
+    model_args.evaluate_during_training_verbose = True,
+    model_args.evaluate_during_training_steps = -1
+    model_args.early_stopping_metric = 'spearmanr'
+    model_args.best_model_dir = best_model_dir
+
+    spearmanr_func = lambda x, y: stats.spearmanr(x, y)[0]
+    pearsonr_func = lambda x, y: stats.pearsonr(x, y)[0]
 
     # Create a ClassificationModel
     model = ClassificationModel(
@@ -57,69 +74,49 @@ def main(args):
         args=model_args
     )
 
-    if not args.eval_only:
-        # Train the model
-        model.train_model(train_df, output_dir=args.output, args={'overwrite_output_dir': False, 'save_steps': -1, 'train_batch_size': 16, 'evaluate_during_training': True, 'evaluate_during_training_verbose': True, 'evaluate_during_training_steps': -1}, eval_df=eval_df, pearsonr=stats.pearsonr, spearmanr=stats.spearmanr)
-    #
-    # # Evaluate the model
-    # result, model_outputs, wrong_predictions = model.eval_model(eval_df, pearsonr=stats.pearsonr, spearmanr=stats.spearmanr)
+    # Train the model
+    model.train_model(train_df, output_dir=model_dir, eval_df=eval_df, pearsonr=pearsonr_func, spearmanr=spearmanr_func)
 
-    best_folder = ''
-    best_prediction = -1
-    # Make predictions with the model
-    for folder in os.listdir(args.output):
-        if not os.path.isdir(os.path.join(args.output, folder)):
-            continue
-        model = ClassificationModel(
-            args.bert_type,
-            os.path.join(args.output, folder),
-            num_labels=1,
-            args=model_args
-        )
+    # Load best model
+    model = ClassificationModel(
+        args.bert_type,
+        best_model_dir,
+        num_labels=1,
+        args=model_args
+    )
 
-        result, model_outputs, wrong_predictions = model.eval_model(eval_df, pearsonr=stats.pearsonr, spearmanr=stats.spearmanr)
+    # Evaluate and save test_results
+    result, model_outputs, wrong_predictions = model.eval_model(test_df, pearsonr=pearsonr_func, spearmanr=spearmanr_func)
+    with open(os.path.join(best_model_dir, 'test_results.txt'), 'w') as f:
+        for key, val in result.items():
+            f.write(f'{key} = {val}\n')
 
-        if result['spearmanr'][0] > best_prediction:
-            best_prediction = result['spearmanr'][0]
-            best_folder = folder
-
-        result, model_outputs, wrong_predictions = model.eval_model(test_df, pearsonr=stats.pearsonr,
-                                                                    spearmanr=stats.spearmanr)
-
-        predictions, raw_outputs = model.predict(test_df['text'])
-
-        with open(os.path.join(args.output, folder, 'test_results.txt'), 'w') as f:
-            for key, val in result.items():
-                f.write(f'{key} = {val}\n')
-            # for text, real_pred, program_pred in zip(eval_df['text'], eval_df['labels'], predictions):
-            #     f.write(f'{text}\t{real_pred}\t{program_pred}\n')
-
-        with open(os.path.join(args.output, folder, 'predictions.tbl'), 'w') as f:
-            for text, real_pred, program_pred in zip(test_df['text'], test_df['labels'], predictions):
-                f.write(f'{text}\t{real_pred}\t{program_pred}\n')
-
-    copyfile(os.path.join(args.output, best_folder, 'test_results.txt'), os.path.join(args.output, best_folder + '-test_results.txt'))
-    copyfile(os.path.join(args.output, best_folder, 'eval_results.txt'), os.path.join(args.output, best_folder + '-eval_results.txt'))
-    copyfile(os.path.join(args.output, best_folder, 'predictions.tbl'), os.path.join(args.output, best_folder + '-predictions.tbl'))
+    # Predict test_results and save file for hand checking
+    predictions, raw_outputs = model.predict(test_df['text'])
+    with open(os.path.join(best_model_dir, 'predictions.tbl'), 'w') as f:
+        for text, real_pred, program_pred in zip(test_df['text'], test_df['labels'], predictions):
+            f.write(f'{text}\t{real_pred}\t{program_pred}\n')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Extract structures from a parsed corpus.')
+        description='BERT normalization regression.')
     parser.add_argument('input',
-                        help='input file in (gz or xml currently). If none, then just database is loaded')
+                        help='Path to input files.')
     parser.add_argument('--bert',
-                        help='input file in (gz or xml currently). If none, then just database is loaded')
+                        help='Path to BERT/bert name.')
     parser.add_argument('--bert_type', default='camembert',
-                        help='input file in (gz or xml currently). If none, then just database is loaded')
-    parser.add_argument('--epochs', type=int, default=5,
-                        help='input file in (gz or xml currently). If none, then just database is loaded')
-    parser.add_argument('--output',
-                        help='input file in (gz or xml currently). If none, then just database is loaded')
-    parser.add_argument('--eval_only', action='store_true',
-                        help='input file in (gz or xml currently). If none, then just database is loaded')
+                        help='Type of bert used.')
+    parser.add_argument('--epochs', type=int, default=10,
+                        help='Epochs number.')
+    parser.add_argument('--model', default='data/models',
+                        help='Path to stored models.')
+    parser.add_argument('--best_model', default='data/best_models/',
+                        help='Path to best models folder.')
+    parser.add_argument('--name',
+                        help='Name under which model and best models will be saved.')
     parser.add_argument('--final_prediction', action='store_true',
-                        help='Merge train and test and use it as a train, and select best algorithm based on dev results.')
+                        help='Merge train and test under train.')
     args = parser.parse_args()
 
     start = time.time()
