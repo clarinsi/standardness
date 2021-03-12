@@ -33,9 +33,6 @@ def main(args):
         with open(f'{args.input}/{filename}', 'r') as f:
             data += [[line.strip().split('\t')[0].lower(), float(line.strip().split('\t')[1])] for line in f.readlines()]
 
-    # TODO ERASE THIS
-    train_data = test_data
-
     train_df = pd.DataFrame(train_data)
     train_df.columns = ["text", "labels"]
 
@@ -61,6 +58,7 @@ def main(args):
     model_args.evaluate_during_training_verbose = True,
     model_args.evaluate_during_training_steps = -1
     model_args.early_stopping_metric = 'spearmanr'
+    model_args.early_stopping_metric_minimize = False
     model_args.best_model_dir = best_model_dir
 
     spearmanr_func = lambda x, y: stats.spearmanr(x, y)[0]
@@ -109,7 +107,7 @@ if __name__ == '__main__':
                         help='Type of bert used.')
     parser.add_argument('--epochs', type=int, default=10,
                         help='Epochs number.')
-    parser.add_argument('--model', default='data/models',
+    parser.add_argument('--model', default='data/custom_models',
                         help='Path to stored models.')
     parser.add_argument('--best_model', default='data/best_models/',
                         help='Path to best models folder.')
