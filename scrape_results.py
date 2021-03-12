@@ -32,7 +32,7 @@ def read_svm(folder_path, folder_name):
             with open(os.path.join(folder_path, file), 'r') as f:
                 text = f.readlines()[0][:-1]
                 pear, spear = text.split('|')
-                results.append([file[:-7], pear.split('=')[1], spear.split('=')[1]])
+                results.append([folder_name + '-' + file[:-11], pear.split('=(')[1].split(',')[0], spear.split('correlation=')[1].split(',')[0]])
 
     return results
 
