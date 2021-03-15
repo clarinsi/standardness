@@ -19,8 +19,8 @@ def read_bert(folder_path, folder_name):
             with open(os.path.join(folder_path, file), 'r') as f:
                 # ugly I know
                 text = f.read()
-                best_result_pearson = float(text.split('pearsonr = (')[1].split(',')[0])
-                best_result_spearman = float(text.split('spearmanr = SpearmanrResult(correlation=')[1].split(',')[0])
+                best_result_pearson = float(text.split('pearsonr = ')[1].split('\n')[0])
+                best_result_spearman = float(text.split('spearmanr = ')[1].split('\n')[0])
 
     return [[folder_name, str(best_result_pearson), str(best_result_spearman)]]
 
@@ -64,9 +64,9 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Walk over results from regression bert and regression svm.')
-    parser.add_argument('--results_path', default='data/outputs/',
+    parser.add_argument('--results_path', default='data/best_models/',
                         help='input file in (gz or xml currently). If none, then just database is loaded')
-    parser.add_argument('--output_file', default='data/outputs/results.tbl',
+    parser.add_argument('--output_file', default='data/outputs/bert_results.tbl',
                         help='input file in (gz or xml currently). If none, then just database is loaded')
     args = parser.parse_args()
 
