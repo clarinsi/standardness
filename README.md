@@ -2,8 +2,6 @@
 
 Benchmarking standardness model on Slovene, Croatian and Serbian
 
-## Standardness
-
 ### Slovene
 
 | model | dataset | Pearson Correlation | Spearman Correlation |
