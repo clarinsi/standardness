@@ -19,11 +19,6 @@ Benchmarking standardness model on Slovene, Croatian and Serbian
 
 ### Croatian
 
-crosloeng-bert-hr_10    722680415836      84760210192
-multilingual-bert-hr_10 510042465469      988189400546
-svm_hr-SVR_rbf_default  6071259315465     973098741254
-hr_bertic_10    626062802188      461722474346
-
 | model | dataset | Pearson Correlation | Spearman Correlation |
 | --- | --- | --- | --- |
 | Ridge | reldi-hr | 0.4551 | 0.3691 |
@@ -36,10 +31,6 @@ hr_bertic_10    626062802188      461722474346
 
 
 ### Serbian
-
-crosloeng-bert-sr_10    532005435161      1357488648
-multilingual-bert-sr_10 573657906424      865368836645
-sr_bertic_10    0.561537276049947       0.4720189625222198
 
 | model | dataset | Pearson Correlation | Spearman Correlation |
 | --- | --- | --- | --- |
