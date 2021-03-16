@@ -50,7 +50,7 @@ def main(args):
     model_args = ClassificationArgs()
     model_args.num_train_epochs = args.epochs
     model_args.regression = True
-    model_args.manual_seed = 23
+    model_args.manual_seed = args.manual_seed
     # model_args.overwrite_output_dir = True
     model_args.save_steps = -1
     model_args.train_batch_size = 16
@@ -115,6 +115,8 @@ if __name__ == '__main__':
                         help='Name under which model and best models will be saved.')
     parser.add_argument('--final_prediction', action='store_true',
                         help='Merge train and test under train.')
+    parser.add_argument('--manual_seed', type=int, default=23,
+                        help='Manual seed.')
     args = parser.parse_args()
 
     start = time.time()
