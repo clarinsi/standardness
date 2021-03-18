@@ -19,6 +19,7 @@ transformers_logger.setLevel(logging.WARNING)
 
 
 def process(args, file, model):
+    logging.info(f'Processing {file}')
     raw_input = []
     with gzip.open(os.path.join(args.json_input, file), 'r') as json_in_f, gzip.open(os.path.join(args.json_output, file), 'wt', encoding='utf8') as json_out_f:
         json_data = json.load(json_in_f)
@@ -88,7 +89,7 @@ def main(args):
     os.makedirs(os.path.dirname(args.tbl_output), exist_ok=True)
 
     model = set_up_model(args)
-    for file in os.listdir(args.json_input):
+    for file in sorted(os.listdir(args.json_input)):
         process(args, file, model)
 
     if args.sample_size > 0:
