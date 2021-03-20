@@ -19,23 +19,25 @@ transformers_logger.setLevel(logging.WARNING)
 
 
 def process(args, file, model):
+    if os.path.exists(os.path.join(args.tbl_output, file)):
+        return
     logging.info(f'Processing {file}')
     raw_input = []
-    with gzip.open(os.path.join(args.json_input, file), 'r') as json_in_f, gzip.open(os.path.join(args.json_output, file), 'wt', encoding='utf8') as json_out_f:
+    with gzip.open(os.path.join(args.json_input, file), 'r') as json_in_f, gzip.open(os.path.join(args.json_output, file), 'wt', encoding='utf8') as json_out_f, open(os.path.join(args.tbl_output, file), 'w') as tbl_out_f:
         json_data = json.load(json_in_f)
         correct_tweets_indices = []
         for i, tweet in enumerate(json_data):
             if tweet['lang_z'] == 1:
                 correct_tweets_indices.append(i)
-                text = _RE_COMBINE_WHITESPACE.sub(" ", tweet['full_text']).strip()
+                twe = tweet['full_text'] if 'full_text' in tweet else tweet['text']
+                text = _RE_COMBINE_WHITESPACE.sub(" ", twe).strip()
                 raw_input.append([text])
 
         predictions = predict(model, raw_input)
 
         # Save info to predictions.tbl
-        with open(os.path.join(args.tbl_output, 'predictions.tbl'), 'a') as f:
-            for text, program_pred in zip(raw_input, predictions):
-                f.write(f'{text[0]}\t{program_pred}\n')
+        for text, program_pred in zip(raw_input, predictions):
+            tbl_out_f.write(f'{text[0]}\t{program_pred}\n')
 
         final_json_data = []
         for i, prediction in zip(correct_tweets_indices, predictions):
@@ -52,7 +54,7 @@ def set_up_model(args):
     model_args.manual_seed = args.manual_seed
     # model_args.overwrite_output_dir = True
     model_args.save_steps = -1
-    model_args.train_batch_size = 16
+    model_args.eval_batch_size = 32
     model_args.evaluate_during_training = True
     model_args.evaluate_during_training_verbose = True,
     model_args.evaluate_during_training_steps = -1
