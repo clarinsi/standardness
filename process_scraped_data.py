@@ -20,11 +20,11 @@ transformers_logger.setLevel(logging.WARNING)
 
 
 def process(args, file, model):
-    if os.path.exists(os.path.join(args.tbl_output, file)):
+    if os.path.exists(os.path.join(args.tbl_output, file[:-3] + '.tbl')):
         return
     logging.info(f'Processing {file}')
     raw_input = []
-    with gzip.open(os.path.join(args.json_input, file), 'r') as json_in_f, gzip.open(os.path.join(args.json_output, file), 'wt', encoding='utf8') as json_out_f, open(os.path.join(args.tbl_output, file), 'w') as tbl_out_f:
+    with gzip.open(os.path.join(args.json_input, file), 'r') as json_in_f, gzip.open(os.path.join(args.json_output, file), 'wt', encoding='utf8') as json_out_f, open(os.path.join(args.tbl_output, file[:-3] + '.tbl'), 'w') as tbl_out_f:
         json_data = json.load(json_in_f)
         correct_tweets_indices = []
         for i, tweet in enumerate(json_data):
