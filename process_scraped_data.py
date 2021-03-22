@@ -21,10 +21,11 @@ transformers_logger.setLevel(logging.WARNING)
 
 def process(args, file, model):
     if os.path.exists(os.path.join(args.tbl_output, file[:-3] + '.tbl')):
+        logging.info(f'Skipping {file} - already processed')
         return
     logging.info(f'Processing {file}')
     raw_input = []
-    with gzip.open(os.path.join(args.json_input, file), 'r') as json_in_f, gzip.open(os.path.join(args.json_output, file), 'wt', encoding='utf8') as json_out_f, open(os.path.join(args.tbl_output, file[:-3] + '.tbl'), 'w') as tbl_out_f:
+    with gzip.open(os.path.join(args.json_input, file), 'r') as json_in_f:
         json_data = json.load(json_in_f)
         correct_tweets_indices = []
         for i, tweet in enumerate(json_data):
@@ -33,6 +34,11 @@ def process(args, file, model):
                 twe = tweet['full_text'] if 'full_text' in tweet else tweet['text']
                 text = _RE_COMBINE_WHITESPACE.sub(" ", twe).strip()
                 raw_input.append([text])
+    if len(raw_input) == 0:
+        logging.info(f'Skipping {file} - 0 hits')
+        return
+    with gzip.open(os.path.join(args.json_output, file), 'wt', encoding='utf8') as json_out_f, open(
+            os.path.join(args.tbl_output, file[:-3] + '.tbl'), 'w') as tbl_out_f:
 
         predictions = predict(model, raw_input)
         predictions = np.atleast_1d(predictions)
