@@ -9,6 +9,7 @@ import re
 import shutil
 import time
 import pandas as pd
+import numpy as np
 
 import logging
 
@@ -34,6 +35,7 @@ def process(args, file, model):
                 raw_input.append([text])
 
         predictions = predict(model, raw_input)
+        predictions = np.atleast_1d(predictions)
 
         # Save info to predictions.tbl
         for text, program_pred in zip(raw_input, predictions):
@@ -55,6 +57,8 @@ def set_up_model(args):
     # model_args.overwrite_output_dir = True
     model_args.save_steps = -1
     model_args.eval_batch_size = 32
+    model_args.use_multiprocessing_for_evaluation = True
+    model_args.use_cached_eval_features = True
     model_args.evaluate_during_training = True
     model_args.evaluate_during_training_verbose = True,
     model_args.evaluate_during_training_steps = -1
@@ -95,9 +99,14 @@ def main(args):
         process(args, file, model)
 
     if args.sample_size > 0:
+        all_tbl_outputs = []
+        for file in sorted(os.listdir(args.tbl_output)):
+            with open(os.path.join(args.tbl_output, file), 'r') as rf:
+                all_tbl_outputs += [line for line in rf.readlines()]
+
         # Predict test_results and save file for hand checking
-        with open(os.path.join(args.tbl_output, 'predictions.tbl'), 'r') as rf, open(os.path.join(args.tbl_output, 'sample.tbl'), 'w') as wf:
-            for line in random.sample([line for line in rf.readlines()], args.sample_size):
+        with open(os.path.join(args.tbl_output, 'sample.tbl'), 'w') as wf:
+            for line in random.sample(all_tbl_outputs, args.sample_size):
                 wf.write(line)
 
 

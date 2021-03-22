@@ -3,3 +3,4 @@ cache_dir/
 data
 outputs
 runs
+venv
