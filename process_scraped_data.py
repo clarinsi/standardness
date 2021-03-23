@@ -64,7 +64,7 @@ def set_up_model(args):
     model_args.save_steps = -1
     model_args.eval_batch_size = 32
     model_args.use_multiprocessing_for_evaluation = True
-    model_args.use_cached_eval_features = True
+    # model_args.use_cached_eval_features = True
     model_args.evaluate_during_training = True
     model_args.evaluate_during_training_verbose = True,
     model_args.evaluate_during_training_steps = -1
