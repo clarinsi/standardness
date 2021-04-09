@@ -36,7 +36,8 @@ def process(args, file, raw_input):
     with gzip.open(os.path.join(args.json_output, file), 'r') as json_in_f:
         json_data = json.load(json_in_f)
         for i, tweet in enumerate(json_data):
-            tweet_text = _RE_COMBINE_WHITESPACE.sub(" ", tweet['text']).strip()
+            twe = tweet['full_text'] if 'full_text' in tweet else tweet['text']
+            tweet_text = _RE_COMBINE_WHITESPACE.sub(" ", twe).strip()
             if validate(tweet_text):
                 if 0.2 < tweet['standardness'] < 0.3:
                     raw_input['0.2-0.3'].append([tweet['id_str'], tweet_text])
