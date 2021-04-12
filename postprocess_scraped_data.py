@@ -40,13 +40,17 @@ def process(args, file, raw_input):
             tweet_text = _RE_COMBINE_WHITESPACE.sub(" ", twe).strip()
             if validate(tweet_text):
                 if 0.2 < tweet['standardness'] < 0.3:
-                    raw_input['0.2-0.3'].append([tweet['id_str'], tweet_text])
+                    if tweet['id_str'] not in raw_input['0.2-0.3']:
+                        raw_input['0.2-0.3'][tweet['id_str']] = tweet_text
                 if 0.3 < tweet['standardness'] < 0.4:
-                    raw_input['0.3-0.4'].append([tweet['id_str'], tweet_text])
+                    if tweet['id_str'] not in raw_input['0.3-0.4']:
+                        raw_input['0.3-0.4'][tweet['id_str']] = tweet_text
                 if 0.4 < tweet['standardness'] < 0.5:
-                    raw_input['0.4-0.5'].append([tweet['id_str'], tweet_text])
+                    if tweet['id_str'] not in raw_input['0.4-0.5']:
+                        raw_input['0.4-0.5'][tweet['id_str']] = tweet_text
                 if 0.5 < tweet['standardness']:
-                    raw_input['0.5+'].append([tweet['id_str'], tweet_text])
+                    if tweet['id_str'] not in raw_input['0.5+']:
+                        raw_input['0.5+'][tweet['id_str']] = tweet_text
 
 
 def save_output(args, raw_input, f_name):
@@ -70,19 +74,19 @@ def main(args):
     os.makedirs(os.path.dirname(args.tbl_batch_output), exist_ok=True)
 
     raw_input = {}
-    raw_input['0.2-0.3'] = []
-    raw_input['0.3-0.4'] = []
-    raw_input['0.4-0.5'] = []
-    raw_input['0.5+'] = []
+    raw_input['0.2-0.3'] = {}
+    raw_input['0.3-0.4'] = {}
+    raw_input['0.4-0.5'] = {}
+    raw_input['0.5+'] = {}
 
     # populate raw_input
     for file in sorted(os.listdir(args.json_output)):
         process(args, file, raw_input)
 
-    save_output(args, sample_list(raw_input['0.2-0.3'], args), '0.2-0.3')
-    save_output(args, sample_list(raw_input['0.3-0.4'], args), '0.3-0.4')
-    save_output(args, sample_list(raw_input['0.4-0.5'], args), '0.4-0.5')
-    save_output(args, sample_list(raw_input['0.5+'], args), '0.5+')
+    save_output(args, sample_list([[k, v] for k, v in raw_input['0.2-0.3'].items()], args), '0.2-0.3')
+    save_output(args, sample_list([[k, v] for k, v in raw_input['0.3-0.4'].items()], args), '0.3-0.4')
+    save_output(args, sample_list([[k, v] for k, v in raw_input['0.4-0.5'].items()], args), '0.4-0.5')
+    save_output(args, sample_list([[k, v] for k, v in raw_input['0.5+'].items()], args), '0.5+')
 
 
 if __name__ == '__main__':
