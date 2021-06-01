@@ -1,0 +1,3 @@
+[submodule "submodules/reldi"]
+	path = submodules/reldi
+	url = https://github.com/clarinsi/reldi-tokeniser.git
